@@ -1,6 +1,9 @@
 ---
 title: "HW 04 - Modeling the GSS"
-output: html_document
+author: "Richie Rines"
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r include = FALSE}
@@ -69,6 +72,13 @@ It's important that you don't recode the NAs, just the remaining levels.
 
 ```{marginfigure}
 You can do this in various ways. One option is to use the `str_detect()` function to detect the existence of words like liberal or conservative. Note that these sometimes show up with lowercase first letters and sometimes with upper case first letters. To detect either in the `str_detect()` function, you can use "[Ll]iberal" and "[Cc]onservative". But feel free to solve the problem however you like, this is just one option!
+```
+
+```{r}
+
+
+
+
 ```
 
 2.  Combine the levels of the `polviews` variable such that levels that have the word "liberal" in them are lumped into a level called `"Liberal"` and those that have the word conservative in them are lumped into a level called `"Conservative"`. Then, re-order the levels in the following order: `"Conservative"` , `"Moderate"`, and `"Liberal"`. Finally, `count()` how many times each new level appears in the `polviews` variable.
