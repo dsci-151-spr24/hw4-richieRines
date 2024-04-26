@@ -191,11 +191,26 @@ collect_metrics(gss16_fit_rs_1)
     -   report the average area under the ROC curve and the accuracy for all cross validation folds `collect_metrics()`.
     
 ```{r}
+gss16_rec_2 <- recipe(advfront ~ polviews + educ, data = gss16_train) %>%
+  step_other(polviews, threshold = 0.10, other = "Other") %>%
+  step_dummy(all_nominal(), -all_outcomes())
 
+gss16_wflow_2 <- workflow() %>%
+  add_model(gss16_spec) %>%
+  add_recipe(gss16_rec_2)
 
+set.seed(1116)
+gss16_folds <- vfold_cv(gss16_train, v = 5)
+
+gss16_fit_rs_2 <- gss16_wflow_2 %>%
+  fit_resamples(resamples = gss16_folds)
+
+collect_metrics(gss16_fit_rs_2)
 ```
 
 10. Comment on which model performs better (one including `wrkstat`, model 1, or the one excluding `wrkstat`, model 2) on the training data based on area under the ROC curve.
+
+***The model excluding `wrkstat` (model 2) performs slightly better than model 1***
 
 11. Fit both models to the testing data, plot the ROC curves for the predictions for both models, and calculate the areas under the ROC curve.
     Does your answer to the previous exercise hold for the testing data as well?
@@ -222,8 +237,42 @@ The question is phrased as the following.
 Answers to this question are stored in the `harass5` variable in our dataset.
 
 12. Create a subset of the data that only contains `Yes` and `No` answers for the harassment question. How many responses chose each of these answers?
+
+```{r}
+harrass_subset <- gss16 %>%
+  filter(harass5 %in% c("Yes","No"))
+
+count(harrass_subset, harass5)
+```
+
+***1136 people fortunately said No while 237 people unfortunately said Yes***
+
 13. Describe how bootstrapping can be used to estimate the proportion of Americans who have been harassed by their superiors or co-workers at their job.
+
+***Bootstrapping displays averages which can apply to Americans as a whole (the whole country essentially)***
+
 14. Calculate a 95% bootstrap confidence interval for the proportion of Americans who have been harassed by their superiors or co-workers at their job. Interpret this interval in context of the data.
+
+```{r}
+harass_bootstrapping <- c()
+i <- 1
+for(i in c(1:500)) {
+  harVar <- harrass_subset %>%
+ slice_sample(n = 1373, replace = TRUE) %>%
+  count(harass5) %>%
+  mutate(n = n/sum(n)) %>%
+  slice_tail()
+
+  harass_bootstrapping <- c(harass_bootstrapping, harVar$n)
+}
+
+t.test(harass_bootstrapping)$conf.int
+```
+
+***The interval is between 0.1717028 and 0.1735121, meaning somewhere between 17.2 and 17.4 percent of Americans have been harassed***
+
 15. Would you expect a 90% confidence interval to be wider or narrower than the interval you calculated above? Explain your reasoning.
+
+***It would be a wider interval, with it being five percent less accurate than the 95% interval***
 
 🧶 ✅ ⬆️ Knit, *commit, and push your changes to GitHub with an appropriate commit message. Make sure to commit and push all changed files so that your Git pane is cleared up afterwards and review the md document on GitHub to make sure you're happy with the final state of your work.*
